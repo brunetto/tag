@@ -64,9 +64,6 @@ func TestRenameTag(t *testing.T) {
 func TestMoveTag(t *testing.T) {
 	t.Parallel()
 
-	// TODO: fix this
-	secondTestUUID := uuid.New()
-
 	tests := []struct {
 		testName  string
 		tag       Tag
@@ -85,14 +82,14 @@ func TestMoveTag(t *testing.T) {
 		{
 			testName: "fail tag is not leaf",
 			tag: Tag{
-				ID: TagID(secondTestUUID), ClassificationID: ClassificationID("fake-classification"),
+				ID: TagID(NewFakeFixedUUID()), ClassificationID: ClassificationID("fake-classification"),
 				Name: map[string]string{"it": "B"}, Status: Ready,
 				Ancestors: Path{TagID(uuid.New())},
 			},
 			tags: []Tag{{
 				ID: TagID(uuid.New()), ClassificationID: ClassificationID("fake-classification"),
 				Name: map[string]string{"it": "B"}, Status: Ready,
-				Ancestors: Path{TagID(secondTestUUID)},
+				Ancestors: Path{TagID(NewFakeFixedUUID())},
 			},
 				newTestTag()},
 			ancestors: Path{TagID(uuid.New()), TagID(uuid.New())},
