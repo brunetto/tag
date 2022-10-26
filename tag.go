@@ -2,6 +2,7 @@ package tag
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 )
@@ -26,6 +27,27 @@ type Tag struct {
 	Name             LocalizedValue
 	Ancestors        Path // TODO: should keep?
 	Status           Status
+}
+
+func NewTag(t TagInsert) (Tag, error) {
+	if len(t.ClassificationID) == 0 {
+		return Tag{}, fmt.Errorf("missing classification id")
+	}
+
+	err := validateName(t.Name)
+	if err != nil {
+		return Tag{}, err
+	}
+
+	tag := Tag{
+		ID:               TagID(uuid.New()),
+		ClassificationID: t.ClassificationID,
+		Name:             t.Name,
+		Ancestors:        t.Ancestors,
+		Status:           Ready,
+	}
+
+	return tag, nil
 }
 
 func (tag Tag) IsRoot() bool {
