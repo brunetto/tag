@@ -23,7 +23,7 @@ func TestNewTag(t *testing.T) {
 			testName: "ok is root",
 			insert: TagInsert{
 				ClassificationID: ClassificationID("fake-classification"),
-				Name:             map[string]string{"it": "B"},
+				Name:             LocalizedValue{"it": "B"},
 				Parent:           TagID(uuid.New()),
 			},
 			isRoot:  true,
@@ -33,7 +33,7 @@ func TestNewTag(t *testing.T) {
 			testName: "ok is not root",
 			insert: TagInsert{
 				ClassificationID: ClassificationID("fake-classification"),
-				Name:             map[string]string{"it": "B"},
+				Name:             LocalizedValue{"it": "B"},
 				Parent:           TagID(uuid.New()),
 				Ancestors:        Path{TagID(uuid.New()), TagID(uuid.New())},
 			},
@@ -43,7 +43,7 @@ func TestNewTag(t *testing.T) {
 		{
 			testName: "should fail if classification id is missing",
 			insert: TagInsert{
-				Name: map[string]string{"it": "B"},
+				Name: LocalizedValue{"it": "B"},
 			},
 			wantErr:  true,
 			errorMsg: "missing classification id",

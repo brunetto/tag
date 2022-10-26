@@ -11,7 +11,7 @@ import (
 func newTestTag() Tag {
 	return Tag{
 		ID: TagID(uuid.New()), ClassificationID: ClassificationID("fake-classification"),
-		Name: map[string]string{"it": "B"}, Status: Ready,
+		Name: LocalizedValue{"it": "B"}, Status: Ready,
 	}
 }
 
@@ -28,16 +28,16 @@ func TestRenameTag(t *testing.T) {
 	}{
 		{
 			testName: "ok",
-			newName:  map[string]string{"it": "C"},
+			newName:  LocalizedValue{"it": "C"},
 			tag:      newTestTag(),
-			wantName: map[string]string{"it": "C"},
+			wantName: LocalizedValue{"it": "C"},
 			wantErr:  false,
 		},
 		{
 			testName: "fail if new name is empty",
 			newName:  nil,
 			tag:      newTestTag(),
-			wantName: map[string]string{"it": "C"},
+			wantName: LocalizedValue{"it": "C"},
 			wantErr:  true, errorMsg: "missing name",
 		},
 	}
@@ -83,12 +83,12 @@ func TestMoveTag(t *testing.T) {
 			testName: "fail tag is not leaf",
 			tag: Tag{
 				ID: TagID(NewFakeFixedUUID()), ClassificationID: ClassificationID("fake-classification"),
-				Name: map[string]string{"it": "B"}, Status: Ready,
+				Name: LocalizedValue{"it": "B"}, Status: Ready,
 				Ancestors: Path{TagID(uuid.New())},
 			},
 			tags: []Tag{{
 				ID: TagID(uuid.New()), ClassificationID: ClassificationID("fake-classification"),
-				Name: map[string]string{"it": "B"}, Status: Ready,
+				Name: LocalizedValue{"it": "B"}, Status: Ready,
 				Ancestors: Path{TagID(NewFakeFixedUUID())},
 			},
 				newTestTag()},
