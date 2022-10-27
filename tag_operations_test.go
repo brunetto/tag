@@ -50,7 +50,7 @@ func TestRenameTag(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
+		tt := tt // see https://github.com/golang/go/discussions/56010
 
 		t.Run(tt.testName, func(t *testing.T) {
 			t.Parallel()
@@ -105,7 +105,7 @@ func TestMoveTag(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
+		tt := tt // see https://github.com/golang/go/discussions/56010
 
 		t.Run(tt.testName, func(t *testing.T) {
 			t.Parallel()
@@ -186,7 +186,7 @@ func TestMakeAliasOf(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
+		tt := tt // see https://github.com/golang/go/discussions/56010
 
 		t.Run(tt.testName, func(t *testing.T) {
 			t.Parallel()
@@ -225,7 +225,7 @@ func Test_samePayload(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
+		tt := tt // see https://github.com/golang/go/discussions/56010
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
