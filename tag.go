@@ -3,11 +3,9 @@ package tag
 import (
 	"errors"
 	"fmt"
-
-	"github.com/google/uuid"
 )
 
-type TagID uuid.UUID
+type TagID UUID
 type ClassificationID string
 type LocalizedValue map[string]string
 
@@ -40,7 +38,7 @@ func NewTag(t TagInsert) (Tag, error) {
 	}
 
 	tag := Tag{
-		ID:               TagID(uuid.New()),
+		ID:               newTagID(),
 		ClassificationID: t.ClassificationID,
 		Name:             t.Name,
 		Ancestors:        t.Ancestors,
@@ -56,7 +54,7 @@ func (tag Tag) IsRoot() bool {
 
 func (tag Tag) GetParent() (TagID, error) {
 	if tag.IsRoot() {
-		return TagID{}, errors.New("can't get parent, I'm root")
+		return newEmptyTagID(), errors.New("can't get parent, I'm root")
 	}
 
 	return tag.Ancestors.GetParent()
@@ -65,4 +63,17 @@ func (tag Tag) GetParent() (TagID, error) {
 // TODO: Do we need this?
 func (tag Tag) GetAncestors() Path {
 	return tag.Ancestors
+}
+
+func newTagID() TagID {
+	return TagID(NewUUID())
+}
+
+func newEmptyTagID() TagID {
+	return TagID("")
+}
+
+// TODO: Clone ancestors
+func (tag Tag) Clone() Tag {
+	return tag
 }

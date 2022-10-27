@@ -21,7 +21,7 @@ func (p Path) IsEmpty() bool {
 
 func (p Path) GetParent() (TagID, error) {
 	if p.IsEmpty() {
-		return TagID{}, errors.New("can't get parent, path is empty")
+		return newEmptyTagID(), errors.New("can't get parent, path is empty")
 	}
 
 	return p[len(p)-1], nil

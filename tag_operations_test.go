@@ -1,16 +1,23 @@
 package tag
 
 import (
+	"fmt"
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func newTestTag() Tag {
 	return Tag{
-		ID: TagID(uuid.New()), ClassificationID: ClassificationID("fake-classification"),
+		ID: newTagID(), ClassificationID: ClassificationID("fake-classification"),
+		Name: LocalizedValue{"it": "B"}, Status: Ready,
+	}
+}
+
+func newFixedTestTag() Tag {
+	return Tag{
+		ID: TagID(NewFakeFixedUUID()), ClassificationID: ClassificationID("fake-classification"),
 		Name: LocalizedValue{"it": "B"}, Status: Ready,
 	}
 }
@@ -76,7 +83,7 @@ func TestMoveTag(t *testing.T) {
 			testName:  "ok",
 			tag:       newTestTag(),
 			tags:      []Tag{newTestTag(), newTestTag()},
-			ancestors: Path{TagID(uuid.New()), TagID(uuid.New())},
+			ancestors: Path{newTagID(), newTagID()},
 			wantErr:   false,
 		},
 		{
@@ -84,15 +91,15 @@ func TestMoveTag(t *testing.T) {
 			tag: Tag{
 				ID: TagID(NewFakeFixedUUID()), ClassificationID: ClassificationID("fake-classification"),
 				Name: LocalizedValue{"it": "B"}, Status: Ready,
-				Ancestors: Path{TagID(uuid.New())},
+				Ancestors: Path{newTagID()},
 			},
 			tags: []Tag{{
-				ID: TagID(uuid.New()), ClassificationID: ClassificationID("fake-classification"),
+				ID: newTagID(), ClassificationID: ClassificationID("fake-classification"),
 				Name: LocalizedValue{"it": "B"}, Status: Ready,
 				Ancestors: Path{TagID(NewFakeFixedUUID())},
 			},
 				newTestTag()},
-			ancestors: Path{TagID(uuid.New()), TagID(uuid.New())},
+			ancestors: Path{newTagID(), newTagID()},
 			wantErr:   true, errorMsg: "can't move tag, is not leaf",
 		},
 	}
@@ -112,6 +119,119 @@ func TestMoveTag(t *testing.T) {
 			}
 
 			assert.Equal(t, tt.ancestors, movedTag.GetAncestors())
+		})
+	}
+}
+
+func TestMakeAliasOf(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		testName string
+		tagA     Tag
+		tagB     Tag
+		tags     []Tag
+		wantErr  bool
+		errorMsg string
+	}{
+		{
+			testName: "ok",
+			tagA:     newTestTag(),
+			tagB:     newTestTag(),
+			tags:     []Tag{newTestTag(), newTestTag()},
+			wantErr:  false,
+		},
+		{
+			testName: "fail tagA is not leaf",
+			tagA: Tag{
+				ID: TagID(NewFakeFixedUUID()), ClassificationID: ClassificationID("fake-classification"),
+				Name: LocalizedValue{"it": "B"}, Status: Ready,
+				Ancestors: Path{newTagID()},
+			},
+			tagB: Tag{
+				ID: newTagID(), ClassificationID: ClassificationID("fake-classification"),
+				Name: LocalizedValue{"it": "B"}, Status: Ready,
+				Ancestors: Path{newTagID()},
+			},
+			tags: []Tag{{
+				ID: newTagID(), ClassificationID: ClassificationID("fake-classification"),
+				Name: LocalizedValue{"it": "B"}, Status: Ready,
+				Ancestors: Path{TagID(NewFakeFixedUUID())},
+			},
+				newTestTag()},
+			wantErr:  true,
+			errorMsg: fmt.Sprintf("can't alias tag, source tag %v is not leaf", TagID(NewFakeFixedUUID())),
+		},
+		{
+			testName: "fail tagB is not leaf",
+			tagA: Tag{
+				ID: newTagID(), ClassificationID: ClassificationID("fake-classification"),
+				Name: LocalizedValue{"it": "B"}, Status: Ready,
+				Ancestors: Path{newTagID()},
+			},
+			tagB: Tag{
+				ID: TagID(NewFakeFixedUUID()), ClassificationID: ClassificationID("fake-classification"),
+				Name: LocalizedValue{"it": "B"}, Status: Ready,
+				Ancestors: Path{newTagID()},
+			},
+			tags: []Tag{{
+				ID: newTagID(), ClassificationID: ClassificationID("fake-classification"),
+				Name: LocalizedValue{"it": "B"}, Status: Ready,
+				Ancestors: Path{TagID(NewFakeFixedUUID())},
+			},
+				newTestTag()},
+			wantErr:  true,
+			errorMsg: fmt.Sprintf("can't alias tag, destination tag %v is not leaf", TagID(NewFakeFixedUUID())),
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+
+		t.Run(tt.testName, func(t *testing.T) {
+			t.Parallel()
+
+			aliasedTag, err := makeAliasOf(tt.tagA, tt.tagB, ChildrenFinder{tt.tags})
+			if tt.wantErr {
+				require.Error(t, err)
+				assert.Contains(t, err.Error(), tt.errorMsg)
+				assert.Equal(t, tt.tagA, aliasedTag)
+				return
+			}
+
+			assert.True(t, samePayload(tt.tagB, aliasedTag))
+		})
+	}
+}
+
+func Test_samePayload(t *testing.T) {
+	tests := []struct {
+		name string
+		tagA Tag
+		tagB Tag
+		want bool
+	}{
+		{
+			name: "same tags",
+			tagA: newTestTag(),
+			tagB: newTestTag(),
+			want: true,
+		},
+		{
+			name: "different tags",
+			tagA: Tag{},
+			tagB: newTestTag(),
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			same := samePayload(tt.tagA, tt.tagB)
+
+			assert.Equal(t, tt.want, same)
 		})
 	}
 }

@@ -1,7 +1,15 @@
 package tag
 
-import "github.com/google/uuid"
+import (
+	"github.com/rs/xid"
+)
 
-func NewFakeFixedUUID() uuid.UUID {
-	return uuid.UUID([16]byte{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1})
+type UUID string
+
+func NewFakeFixedUUID() UUID {
+	return UUID("fake-uuid")
+}
+
+func NewUUID() string {
+	return xid.New().String()
 }

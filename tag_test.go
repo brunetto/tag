@@ -3,7 +3,6 @@ package tag
 import (
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -24,7 +23,7 @@ func TestNewTag(t *testing.T) {
 			insert: TagInsert{
 				ClassificationID: ClassificationID("fake-classification"),
 				Name:             LocalizedValue{"it": "B"},
-				Parent:           TagID(uuid.New()),
+				Parent:           newTagID(),
 			},
 			isRoot:  true,
 			wantErr: false,
@@ -34,8 +33,8 @@ func TestNewTag(t *testing.T) {
 			insert: TagInsert{
 				ClassificationID: ClassificationID("fake-classification"),
 				Name:             LocalizedValue{"it": "B"},
-				Parent:           TagID(uuid.New()),
-				Ancestors:        Path{TagID(uuid.New()), TagID(uuid.New())},
+				Parent:           newTagID(),
+				Ancestors:        Path{newTagID(), newTagID()},
 			},
 			isRoot:  false,
 			wantErr: false,
@@ -76,6 +75,31 @@ func TestNewTag(t *testing.T) {
 			assert.Equal(t, tt.insert.Name, res.Name)
 			assert.Equal(t, tt.insert.ClassificationID, res.ClassificationID)
 			assert.Equal(t, tt.isRoot, res.IsRoot())
+		})
+	}
+}
+
+func TestTag_Clone(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name string
+		tag  Tag
+		want Tag
+	}{
+		{
+			name: "clone successful",
+			tag:  newTestTag(),
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			cloned := tt.tag.Clone()
+
+			assert.Equal(t, tt.tag, cloned)
 		})
 	}
 }
